@@ -1,24 +1,59 @@
-import logo from './logo.svg';
+import { Suspense, useState } from 'react';
+import i18n from 'i18next'
+import { useTranslation, initReactI18next, Trans } from 'react-i18next'; 
 import './App.css';
 
+
+const translationsEn = {
+  welcome: 'Welcome!',
+  "sample-text": "Sample <bold> <italic>text</italic></bold>",
+  changed: "You have changed the language {{count}} time",
+  changed_plural:"You have changed the language {{count}} times",
+};
+
+const translationsFr = {
+  welcome: "Bienvenue!",
+  "sample-text": "Exemple de <bold><italic>Texte</italic></bold>.",
+  changed: "Vous avez changé la langue {{count}} fois",
+}
+
+i18n.use(initReactI18next)
+.init({
+  resources: {
+    en: { translation: translationsEn},
+  fr: { translation: translationsFr},
+},
+lng: "en",
+fallbacklng: "en",
+interpolation: { escapeValue: false}
+})
 function App() {
+  const { t } = useTranslation();
+  const [count, setCount] = useState(0);
+  const onChange = (event) =>{
+    i18n.changeLanguage(event.target.value);
+    setCount((previousCount)=> previousCount + 1)
+  }
   return (
-    <div className="App">
+    <Suspense fallback= { "Loading.."}>
+      <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <h1>{t("welcome")}</h1>
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          <Trans components= {{bold: <strong/>, italic: <i/>}}>
+            sample text
+          </Trans>
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <p>{t("changed", {count})}</p>
+        <select name="language" onChange={onChange}>
+          <option value="en">English</option>
+          <option value="fr">French</option>
+        </select>
       </header>
     </div>
+
+    </Suspense>
+    
   );
 }
 
